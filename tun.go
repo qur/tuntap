@@ -30,7 +30,7 @@ const (
 type Flag int
 
 const (
-	Default Flag = OneQueue
+	DefaultFlags Flag = OneQueue
 )
 
 type Packet struct {
@@ -73,21 +73,33 @@ func (t *Interface) ReadPacket() (*Packet, error) {
 		return nil, err
 	}
 
-	pkt := &Packet{Packet: buf[4:n]}
-	pkt.Protocol = int(binary.BigEndian.Uint16(buf[2:4]))
-	flags := *(*uint16)(unsafe.Pointer(&buf[0]))
-	if flags&flagTruncated != 0 {
-		pkt.Truncated = true
+	pkt := &Packet{}
+
+	if t.flags&Raw != 0 {
+		pkt.Packet = buf[:n]
+	} else {
+		pkt.Packet = buf[4:n]
+		pkt.Protocol = int(binary.BigEndian.Uint16(buf[2:4]))
+		flags := *(*uint16)(unsafe.Pointer(&buf[0]))
+		if flags&flagTruncated != 0 {
+			pkt.Truncated = true
+		}
 	}
+
 	return pkt, nil
 }
 
 // Send a single packet to the kernel.
 func (t *Interface) WritePacket(pkt *Packet) error {
-	// If only we had writev(), I could do zero-copy here...
-	buf := make([]byte, len(pkt.Packet)+4)
-	binary.BigEndian.PutUint16(buf[2:4], uint16(pkt.Protocol))
-	copy(buf[4:], pkt.Packet)
+	buf := pkt.Packet
+
+	if t.flags&Raw == 0 {
+		// If only we had writev(), I could do zero-copy here...
+		buf = make([]byte, len(pkt.Packet)+4)
+		binary.BigEndian.PutUint16(buf[2:4], uint16(pkt.Protocol))
+		copy(buf[4:], pkt.Packet)
+	}
+
 	n, err := t.file.Write(buf)
 	if err != nil {
 		return err
@@ -112,7 +124,7 @@ func (t *Interface) WritePacket(pkt *Packet) error {
 // Returns a TunTap object with channels to send/receive packets, or
 // nil and an error if connecting to the interface failed.
 func Open(ifPattern string, kind DevKind) (*Interface, error) {
-	return OpenFlags(ifPattern, kind, Default)
+	return OpenFlags(ifPattern, kind, DefaultFlags)
 }
 
 // OpenFlags connects to the specified tun/tap interface.
