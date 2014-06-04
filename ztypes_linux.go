@@ -6,9 +6,11 @@ package tuntap
 const (
 	flagTruncated	= 0x1
 
-	iffTun		= 0x1
-	iffTap		= 0x2
-	iffOneQueue	= 0x2000
+	iffTun	= 0x1
+	iffTap	= 0x2
+
+	OneQueue	= Flag(0x2000)
+	Raw		= Flag(0x1000)
 )
 
 type ifReq struct {

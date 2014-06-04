@@ -17,7 +17,9 @@ const (
 
 	iffTun = C.IFF_TUN
 	iffTap = C.IFF_TAP
-	iffOneQueue = C.IFF_ONE_QUEUE
+
+	OneQueue = Flag(C.IFF_ONE_QUEUE)
+	Raw = Flag(C.IFF_NO_PI)
 )
 
 type ifReq struct {

@@ -27,6 +27,12 @@ const (
 	DevTap
 )
 
+type Flag int
+
+const (
+	Default Flag = OneQueue
+)
+
 type Packet struct {
 	// The Ethernet type of the packet. Commonly seen values are
 	// 0x8000 for IPv4 and 0x86dd for IPv6.
@@ -41,6 +47,7 @@ type Packet struct {
 type Interface struct {
 	name string
 	file     *os.File
+	flags Flag
 }
 
 // Disconnect from the tun/tap interface.
@@ -105,16 +112,33 @@ func (t *Interface) WritePacket(pkt *Packet) error {
 // Returns a TunTap object with channels to send/receive packets, or
 // nil and an error if connecting to the interface failed.
 func Open(ifPattern string, kind DevKind) (*Interface, error) {
+	return OpenFlags(ifPattern, kind, Default)
+}
+
+// OpenFlags connects to the specified tun/tap interface.
+//
+// If the specified device has been configured as persistent, this
+// simply looks like a "cable connected" event to observers of the
+// interface. Otherwise, the interface is created out of thin air.
+//
+// ifPattern can be an exact interface name, e.g. "tun42", or a
+// pattern containing one %d format specifier, e.g. "tun%d". In the
+// latter case, the kernel will select an available interface name and
+// create it.
+//
+// Returns a TunTap object with channels to send/receive packets, or
+// nil and an error if connecting to the interface failed.
+func OpenFlags(ifPattern string, kind DevKind, flags Flag) (*Interface, error) {
 	file, err := os.OpenFile("/dev/net/tun", os.O_RDWR, 0)
 	if err != nil {
 		return nil, err
 	}
 
-	ifName, err := createInterface(file, ifPattern, kind)
+	ifName, err := createInterface(file, ifPattern, kind, uint16(flags))
 	if err != nil {
 		file.Close()
 		return nil, err
 	}
 
-	return &Interface{ifName, file}, nil
+	return &Interface{ifName, file, flags}, nil
 }

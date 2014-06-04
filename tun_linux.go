@@ -6,9 +6,9 @@ import (
 	"syscall"
 )
 
-func createInterface(file *os.File, ifPattern string, kind DevKind) (string, error) {
+func createInterface(file *os.File, ifPattern string, kind DevKind, flags uint16) (string, error) {
 	var req ifReq
-	req.Flags = iffOneQueue
+	req.Flags = flags
 	copy(req.Name[:15], ifPattern)
 	switch kind {
 	case DevTun:
