@@ -4,17 +4,17 @@
 package tuntap
 
 const (
-	flagTruncated	= 0x1
+	flagTruncated = 0x1
 
-	iffTun	= 0x1
-	iffTap	= 0x2
+	iffTun = 0x1
+	iffTap = 0x2
 
-	OneQueue	= Flag(0x2000)
-	Raw		= Flag(0x1000)
+	OneQueue = Flag(0x2000)
+	Raw      = Flag(0x1000)
 )
 
 type ifReq struct {
-	Name	[0x10]byte
-	Flags	uint16
-	pad	[0x28 - 0x10 - 2]byte
+	Name  [0x10]byte
+	Flags uint16
+	pad   [0x28 - 0x10 - 2]byte
 }

@@ -45,8 +45,8 @@ type Packet struct {
 }
 
 type Interface struct {
-	name string
-	file     *os.File
+	name  string
+	file  *os.File
 	flags Flag
 }
 

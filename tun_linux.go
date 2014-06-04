@@ -2,8 +2,8 @@ package tuntap
 
 import (
 	"os"
-	"unsafe"
 	"syscall"
+	"unsafe"
 )
 
 func createInterface(file *os.File, ifPattern string, kind DevKind, flags uint16) (string, error) {

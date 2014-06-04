@@ -19,11 +19,11 @@ const (
 	iffTap = C.IFF_TAP
 
 	OneQueue = Flag(C.IFF_ONE_QUEUE)
-	Raw = Flag(C.IFF_NO_PI)
+	Raw      = Flag(C.IFF_NO_PI)
 )
 
 type ifReq struct {
-	Name [C.IFNAMSIZ]byte
+	Name  [C.IFNAMSIZ]byte
 	Flags uint16
-	pad [C.IFREQ_SIZE-C.IFNAMSIZ-2]byte
+	pad   [C.IFREQ_SIZE - C.IFNAMSIZ - 2]byte
 }
